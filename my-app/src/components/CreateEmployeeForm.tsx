@@ -68,7 +68,7 @@ export function CreateEmployeeForm() {
       street: "",
       city: "",
       state: "state",
-      "zip-code": 0,
+      "zip-code": undefined,
       department: "department",
     },
   });
