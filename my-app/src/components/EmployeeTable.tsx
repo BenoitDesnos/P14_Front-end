@@ -9,6 +9,7 @@ import {
 import {
   ColumnDef,
   ColumnFiltersState,
+  FilterFn,
   SortingState,
   VisibilityState,
   flexRender,
@@ -40,6 +41,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Employee } from "@/store/useEmployee";
+import { rankItem } from "@tanstack/match-sorter-utils";
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  // Rank the item
+  const itemRank = rankItem(row.getValue(columnId), value);
+  // Store the itemRank info
+  addMeta({
+    itemRank,
+  });
+
+  // Return if the item should be filtered in/out
+  return itemRank.passed;
+};
 
 export const columns: ColumnDef<Employee>[] = [
   {
@@ -89,12 +102,9 @@ export const columns: ColumnDef<Employee>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("startdate"));
-      const formatted = date.toLocaleDateString();
-
-      return <div className="capitalize">{formatted}</div>;
-    },
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("startdate")}</div>
+    ),
   },
   {
     accessorKey: "department",
@@ -126,12 +136,7 @@ export const columns: ColumnDef<Employee>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("dob"));
-      const formatted = date.toLocaleDateString();
-
-      return <div className="capitalize">{formatted}</div>;
-    },
+    cell: ({ row }) => <div className="capitalize">{row.getValue("dob")}</div>,
   },
   {
     accessorKey: "street",
@@ -202,10 +207,10 @@ export const columns: ColumnDef<Employee>[] = [
 ];
 
 export function EmployeeTable({ employees }: { employees: Employee[] }) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -214,7 +219,11 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
   const table = useReactTable({
     data: employees,
     columns,
-    onSortingChange: setSorting,
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: fuzzyFilter,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -223,32 +232,28 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
-      sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
     },
   });
-
-  /*   table
-    .getAllColumns()
-    .forEach((column) => return column.getFilterValue());
-
-  table.getAllColumns().forEach((column) => column.getFilterValue()); */
-
+  const numberOfPages = table.getPageCount();
+  const numberOfEntries = table.getFilteredRowModel().rows.length;
+  const numberOfEntriesPerPage = table.getState().pagination.pageSize;
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const firstEntry = numberOfEntriesPerPage * (currentPage - 1) + 1;
+  const lastEntry =
+    numberOfEntriesPerPage * currentPage > numberOfEntries
+      ? numberOfEntries
+      : numberOfEntriesPerPage * currentPage;
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter emails..."
-          value={
-            (table.getColumn("firstname")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) => {
-            console.log(
-              table.getColumn("firstname")?.setFilterValue(event.target.value)
-            );
-          }}
+          placeholder="Filter..."
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(String(e.target.value))}
           className="max-w-sm"
         />
         <DropdownMenu>
@@ -330,8 +335,7 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {firstEntry} to {lastEntry} of {numberOfEntries} entries{" "}
         </div>
         <div className="space-x-2">
           <Button

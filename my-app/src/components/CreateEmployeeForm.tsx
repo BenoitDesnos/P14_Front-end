@@ -50,9 +50,7 @@ export const FormSchema = z.object({
   state: z.string().min(2, {
     message: "state must be at least 2 characters.",
   }),
-  "zip-code": z.string().min(2, {
-    message: "zip-code must be at least 2 characters.",
-  }),
+  "zip-code": z.string().transform((v) => Number(v) || 0),
   department: z.string().min(2, {
     message: "department must be at least 2 characters.",
   }),
@@ -70,13 +68,23 @@ export function CreateEmployeeForm() {
       street: "",
       city: "",
       state: "state",
-      "zip-code": "",
+      "zip-code": 0,
       department: "department",
     },
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    addEmployee(data);
+    // transform date into string for global filtering
+    const { dob, startdate, ...rest } = data;
+    const dobFormatted = dob.toLocaleDateString();
+    const startDateFormatted = startdate.toLocaleDateString();
+    const dataToSend = {
+      ...rest,
+      dob: dobFormatted,
+      startdate: startDateFormatted,
+    };
+
+    addEmployee(dataToSend);
   }
 
   return (
@@ -191,7 +199,7 @@ export function CreateEmployeeForm() {
               <FormItem>
                 <FormLabel>Zip Code</FormLabel>
                 <FormControl>
-                  <Input placeholder="Zip Code" {...field} />
+                  <Input type="number" placeholder="Zip Code" {...field} />
                 </FormControl>
 
                 <FormMessage />
