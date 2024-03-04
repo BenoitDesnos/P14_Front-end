@@ -42,6 +42,24 @@ import {
 } from "@/components/ui/table";
 import { Employee } from "@/store/useEmployee";
 import { rankItem } from "@tanstack/match-sorter-utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination";
+import TablePagination from "./TablePagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
@@ -239,6 +257,7 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
     },
   });
   const numberOfPages = table.getPageCount();
+
   const numberOfEntries = table.getFilteredRowModel().rows.length;
   const numberOfEntriesPerPage = table.getState().pagination.pageSize;
   const currentPage = table.getState().pagination.pageIndex + 1;
@@ -256,32 +275,30 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
           onChange={(e) => setGlobalFilter(String(e.target.value))}
           className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center space-x-6 lg:space-x-8 ml-auto">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium">Rows per page</p>
+            <Select
+              value={`${table.getState().pagination.pageSize}`}
+              onValueChange={(value) => {
+                table.setPageSize(Number(value));
+              }}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue
+                  placeholder={table.getState().pagination.pageSize}
+                />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 40, 50].map((pageSize) => (
+                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -337,24 +354,12 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
         <div className="flex-1 text-sm text-muted-foreground">
           {firstEntry} to {lastEntry} of {numberOfEntries} entries{" "}
         </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+
+        <TablePagination
+          table={table}
+          currentPage={currentPage}
+          numberOfPages={numberOfPages}
+        ></TablePagination>
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useEmployeeState } from "@/store/useEmployee";
-import { EmployeeTable } from "@/components/EmployeeTable";
+import { EmployeeTable } from "@/components/EmployeeTable/EmployeeTable";
+
 
 const EmployeeList = () => {
   const { employees } = useEmployeeState();
