@@ -50,7 +50,7 @@ export const FormSchema = z.object({
   state: z.string().min(2, {
     message: "state must be at least 2 characters.",
   }),
-  "zip-code": z.string().transform((v) => Number(v) || 0),
+  "zip-code": z.coerce.number(),
   department: z.string().min(2, {
     message: "department must be at least 2 characters.",
   }),
