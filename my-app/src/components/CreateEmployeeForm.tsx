@@ -27,6 +27,7 @@ import {
 import { Label } from "./ui/label";
 import { Employee, useEmployeeState } from "@/store/useEmployee";
 import { add } from "date-fns";
+import { states } from "@/lib/utils";
 
 export const FormSchema = z.object({
   firstname: z.string().min(2, {
@@ -83,6 +84,7 @@ export function CreateEmployeeForm() {
       dob: dobFormatted,
       startdate: startDateFormatted,
     };
+    console.log(dataToSend);
 
     addEmployee(dataToSend);
   }
@@ -168,7 +170,7 @@ export function CreateEmployeeForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>State</FormLabel>
-                <Select>
+                <Select onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="State" />
@@ -177,13 +179,14 @@ export function CreateEmployeeForm() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>States</SelectLabel>
-                      <SelectItem value="Sales">Sales</SelectItem>
-                      <SelectItem value="Marketing">Marketing</SelectItem>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="Human Resources">
-                        Human Resources
-                      </SelectItem>
-                      <SelectItem value="Legal">Legal</SelectItem>
+                      {states.map((state) => (
+                        <SelectItem
+                          key={state.abbreviation}
+                          value={state.abbreviation}
+                        >
+                          {state.name}
+                        </SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -213,7 +216,7 @@ export function CreateEmployeeForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel htmlFor="department">Department</FormLabel>
-              <Select>
+              <Select onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Department" />
@@ -242,3 +245,5 @@ export function CreateEmployeeForm() {
     </Form>
   );
 }
+
+
