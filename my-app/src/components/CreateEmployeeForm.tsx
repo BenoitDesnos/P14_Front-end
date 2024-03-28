@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,7 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
 import DatePickerField from "./DatePickerField";
 import {
   Select,
@@ -24,10 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Label } from "./ui/label";
-import { Employee, useEmployeeState } from "@/store/useEmployee";
-import { add } from "date-fns";
+import { useEmployeeState } from "@/store/useEmployee";
 import { states } from "@/lib/utils";
+import { Dialog } from "dialog-react-library-bd";
+import { useState } from "react";
 
 export const FormSchema = z.object({
   firstname: z.string().min(2, {
@@ -59,6 +57,7 @@ export const FormSchema = z.object({
 
 export function CreateEmployeeForm() {
   const { addEmployee } = useEmployeeState();
+  const [isError, setIsError] = useState(false);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -75,6 +74,9 @@ export function CreateEmployeeForm() {
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    setIsError(false);
+    console.log(data);
+
     // transform date into string for global filtering
     const { dob, startdate, ...rest } = data;
     const dobFormatted = dob.toLocaleDateString();
@@ -88,10 +90,14 @@ export function CreateEmployeeForm() {
 
     addEmployee(dataToSend);
   }
+  const onError = (error: any) => {
+    setIsError(true);
+    console.log(error);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+      <form className="w-2/3 space-y-6">
         <FormField
           control={form.control}
           name="firstname"
@@ -240,10 +246,25 @@ export function CreateEmployeeForm() {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
       </form>
+      <Dialog
+        triggerFn={form.handleSubmit(onSubmit, onError)}
+        className={""}
+        buttonClass={"text-black mt-6"}
+        buttonLabel={"Submit"}
+      >
+        {
+          // error message
+          isError ? (
+            <p className="text-red-500">
+              There was an error creating the employee.
+            </p>
+          ) : (
+            <p>Employee Created!</p>
+          )
+        }
+      </Dialog>
     </Form>
   );
 }
-
 

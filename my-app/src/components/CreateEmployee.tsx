@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { CreateEmployeeForm } from "./CreateEmployeeForm";
-import { Button } from "dialog-react-library-bd";
 const CreateEmployee = () => {
   return (
     <>
@@ -20,10 +19,6 @@ const CreateEmployee = () => {
         </h2>
         <CreateEmployeeForm />
       </div>
-      <div id="confirmation" className="modal">
-        Employee Created!
-      </div>
-      <Button className="bg-slate-500">test</Button>
     </>
   );
 };
