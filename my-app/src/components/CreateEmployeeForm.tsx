@@ -70,7 +70,7 @@ export function CreateEmployeeForm() {
       street: "",
       city: "",
       state: "state",
-      "zip-code": undefined,
+      "zip-code": 0,
       department: "department",
     },
   });
@@ -80,7 +80,6 @@ export function CreateEmployeeForm() {
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     setIsError(false);
-    console.log(data);
 
     // transform date into string for global filtering
     const { dob, startdate, ...rest } = data;
@@ -91,13 +90,10 @@ export function CreateEmployeeForm() {
       dob: dobFormatted,
       startdate: startDateFormatted,
     };
-    console.log(dataToSend);
-
     addEmployee(dataToSend);
   }
-  const onError = (error: any) => {
+  const onError = () => {
     setIsError(true);
-    console.log(error);
   };
 
   return (
@@ -255,7 +251,8 @@ export function CreateEmployeeForm() {
       <Dialog
         openButtonProps={{
           onClick: form.handleSubmit(onSubmit, onError),
-          className: "text-black mt-6",
+          className: "text-white mt-6 px-4 py-2 rounded-md",
+          style: { backgroundColor: "#000000" },
         }}
         closeButtonProps={{
           onClick: handlCLose,

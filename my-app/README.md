@@ -1,4 +1,0 @@
-| Name            | Type    | Default | Description                                                                                 |
-|-----------------|---------|---------|---------------------------------------------------------------------------------------------|
-| autoComplete    | string  | -       | This prop helps users to fill forms faster, especially on mobile devices. The name can be confusing, as it's more like an autofill. You can learn more about it following the [specification](#). |
-| autoFocus       | bool    | false   | If true, the input element is focused during the first mount.                              |

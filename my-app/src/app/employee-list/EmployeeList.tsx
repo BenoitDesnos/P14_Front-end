@@ -9,11 +9,10 @@ const EmployeeList = () => {
 
   return (
     <>
-      <div id="employee-div" className="container">
-        <h1>Current Employees</h1>
-        <EmployeeTable employees={employees} />
-        <Link href={"/"}>Home test</Link>
-      </div>
+      <EmployeeTable employees={employees} />
+      <Link className="bg-black p-2 rounded-sm text-white " href={"/"}>
+        Create Employee
+      </Link>
     </>
   );
 };
