@@ -26,6 +26,7 @@ import { useEmployeeState } from "@/store/useEmployee";
 import { states } from "@/lib/utils";
 import { Dialog } from "dialog-react-library-bd";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export const FormSchema = z.object({
   firstname: z.string().min(2, {
@@ -56,6 +57,7 @@ export const FormSchema = z.object({
 });
 
 export function CreateEmployeeForm() {
+  const router = useRouter();
   const { addEmployee } = useEmployeeState();
   const [isError, setIsError] = useState(false);
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -72,6 +74,9 @@ export function CreateEmployeeForm() {
       department: "department",
     },
   });
+  const handlCLose = () => {
+    !isError && router.push("/employee-list");
+  };
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     setIsError(false);
@@ -248,9 +253,13 @@ export function CreateEmployeeForm() {
         />
       </form>
       <Dialog
-        triggerFn={form.handleSubmit(onSubmit, onError)}
-        className={""}
-        buttonClass={"text-black mt-6"}
+        openButtonProps={{
+          onClick: form.handleSubmit(onSubmit, onError),
+          className: "text-black mt-6",
+        }}
+        closeButtonProps={{
+          onClick: handlCLose,
+        }}
         buttonLabel={"Submit"}
       >
         {
